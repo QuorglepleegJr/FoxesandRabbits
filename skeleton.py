@@ -267,7 +267,7 @@ class Warren:
       RabbitsToEat = self.__RabbitCount
     while DeathCount < RabbitsToEat:
       RabbitNumber = random.randint(0, self.__RabbitCount - 1)
-      if not self.__Rabbits[RabbitNumber] is None:
+      if self.__Rabbits[RabbitNumber] is not None:
         self.__Rabbits[RabbitNumber] = None
         DeathCount += 1
     self.__CompressRabbitList(DeathCount)
@@ -358,10 +358,11 @@ class Animal:
     return not self._IsAlive
 
   def Inspect(self):
-    print("  ID", self._ID, "", end = "")
-    print("Age", self._Age, "", end = "")
-    print("LS", self._NaturalLifespan, "", end = "")
-    print("Pr dth", round(self._ProbabilityOfDeathOtherCauses, 2), "", end = "")
+    print("  Information: ")
+    print("    ID:                  ", self._ID)
+    print("    Age:                 ", self._Age)
+    print("    Lifespan:            ", self._NaturalLifespan)
+    print("    Probability of death:", round(self._ProbabilityOfDeathOtherCauses, 2))
 
   def CheckIfKilledByOtherFactor(self):
     if random.randint(0, 100) < self._ProbabilityOfDeathOtherCauses * 100:
@@ -416,8 +417,8 @@ class Fox(Animal):
   
   def Inspect(self):
     super(Fox, self).Inspect()
-    print("Food needed", self.__FoodUnitsNeeded, "", end = "")
-    print("Food eaten", self.__FoodUnitsConsumedThisPeriod, "", end = "")
+    print("    Food needed:         ", self.__FoodUnitsNeeded)
+    print("    Food eaten:          ", self.__FoodUnitsConsumedThisPeriod)
     print()
 
 class Genders(enum.Enum):
@@ -437,11 +438,11 @@ class Rabbit(Animal):
 
   def Inspect(self):
     super(Rabbit, self).Inspect()
-    print("Rep rate", round(self.__ReproductionRate, 1), "", end = "")
+    print("    Rep rate:            ", round(self.__ReproductionRate, 1))
     if self.__Gender == Genders.Female:
-      print("Gender Female")
+      print("    Gender:              Female")
     else:
-      print("Gender Male")
+      print("    Gender:              Male")
     
   def IsFemale(self):
     if self.__Gender == Genders.Female:
@@ -476,6 +477,7 @@ def Main():
         Variability = int(input("Randomness variability (percent): "))
         FixedInitialLocations = False
       Sim = Simulation(LandscapeSize, InitialWarrenCount, InitialFoxCount, Variability, FixedInitialLocations)
+  print("\nPress Enter to continue:")
   input()
 
 if __name__ == "__main__":
