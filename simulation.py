@@ -460,7 +460,8 @@ def Main():
     print()
     print("1. Run simulation with default settings")
     print("2. Run simulation with custom settings")
-    print("3. Exit")
+    print("3. Run simulation of Rabbit Paradise")
+    print("4. Exit")
     print()
     MenuOption = int(input("Select option: "))
     if MenuOption == 1 or MenuOption == 2:
