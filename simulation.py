@@ -134,7 +134,8 @@ class Simulation:
       self.__Landscape[9][7].Warren = Warren(self.__Variability, 20)
       self.__Landscape[10][3].Warren = Warren(self.__Variability, 52)
       self.__Landscape[13][4].Warren = Warren(self.__Variability, 67)
-      self.__WarrenCount = 5
+      self.__Landscape[11][4].Warren = GiantWarren(self.__Variability, 115)
+      self.__WarrenCount = 6
       self.__Landscape[2][10].Fox = Fox(self.__Variability)
       self.__Landscape[6][1].Fox = Fox(self.__Variability)
       self.__Landscape[8][6].Fox = Fox(self.__Variability)
@@ -194,10 +195,12 @@ class Simulation:
     print()
     print("TIME PERIOD:", self.__TimePeriod)
     print()
-    print("   ", end = "")
+    print("    ", end = "")
     for x in range (0, self.__LandscapeSize):
       if x < 10:
-        print(" ", end = "")
+        print("  ", end = "")
+      elif x < 100:
+        print(" ", end="")
       print(x, "|", end = "")
     print()
     for x in range (0, self.__LandscapeSize * 4 + 3):
@@ -222,8 +225,8 @@ class Simulation:
       print()
 
 class Warren:
-  def __init__(self, Variability, RabbitCount = 0):
-    self.__MAX_RABBITS_IN_WARREN = 99
+  def __init__(self, Variability, RabbitCount = 0, maxRabbits = 99):
+    self.__MAX_RABBITS_IN_WARREN = maxRabbits
     self.__RabbitCount = RabbitCount
     self.__PeriodsRun = 0
     self.__AlreadySpread = False
@@ -343,6 +346,14 @@ class Warren:
     if self.__RabbitCount > 0:
       for r in range (0, self.__RabbitCount):
         self.__Rabbits[r].Inspect()
+  
+class GiantWarren(Warren):
+  def __init__(self, variability, rabbit_count = 1):
+    super().__init__(variability, rabbit_count, 200)
+  
+  def NeedToCreateNewWarren(self):
+    self.__AlreadySpread = False
+    return super().NeedToCreateNewWarren()
 
 class Animal:
   _ID = 1
