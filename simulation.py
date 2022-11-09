@@ -10,13 +10,15 @@ import math
 class Location:
   def __init__(self):
     self.Fox = None
-    self.Warren = None
+    self.Hole = None
+    self.hole_type = None
 
 class Simulation:
   def __init__(self, LandscapeSize, InitialWarrenCount, InitialFoxCount, Variability, FixedInitialLocations):
     self.__ViewRabbits = ""
     self.__TimePeriod = 0
     self.__WarrenCount = 0
+    self.__den_count = 0
     self.__FoxCount = 0
     self.__ShowDetail = False
     self.__LandscapeSize = LandscapeSize
@@ -63,11 +65,11 @@ class Simulation:
       if MenuOption == 4:
         x = self.__InputCoordinate("x")
         y = self.__InputCoordinate("y")
-        if not self.__Landscape[x][y].Warren is None:
-          self.__Landscape[x][y].Warren.Inspect()
+        if not self.__Landscape[x][y].Hole is None:
+          self.__Landscape[x][y].Hole.Inspect()
           self.__ViewRabbits = input("View individual rabbits (y/n)? ")
           if self.__ViewRabbits == "y":
-            self.__Landscape[x][y].Warren.ListRabbits()
+            self.__Landscape[x][y].Hole.ListRabbits()
     input()
     
   def __InputCoordinate(self, CoordinateName):
@@ -80,23 +82,37 @@ class Simulation:
       print()
     for x in range (0, self.__LandscapeSize):
       for y in range (0, self.__LandscapeSize):
-        if not self.__Landscape[x][y].Warren is None:
-          if self.__ShowDetail:
-            print("Warren at (", x, ",", y, "):", sep = "")
-            print("  Period Start: ", end = "")
-            self.__Landscape[x][y].Warren.Inspect()
-          if self.__FoxCount > 0:
-            self.__FoxesEatRabbitsInWarren(x, y)
-          if self.__Landscape[x][y].Warren.NeedToCreateNewWarren():
-            self.__CreateNewWarren()
-          self.__Landscape[x][y].Warren.AdvanceGeneration(self.__ShowDetail)
-          if self.__ShowDetail:
-            print("  Period End: ", end = "")
-            self.__Landscape[x][y].Warren.Inspect()
-            input()
-          if self.__Landscape[x][y].Warren.WarrenHasDiedOut():
-            self.__Landscape[x][y].Warren = None
-            self.__WarrenCount -= 1
+        if not self.__Landscape[x][y].Hole is None:
+          if self.__Landscape[x][y].hole_type == HoleTypes.warren:
+            if self.__ShowDetail:
+              print("Warren at (", x, ",", y, "):", sep = "")
+              print("  Period Start: ", end = "")
+              self.__Landscape[x][y].Hole.Inspect()
+            if self.__FoxCount > 0:
+              self.__FoxesEatRabbitsInWarren(x, y)
+            if self.__Landscape[x][y].Hole.NeedToCreateNewWarren():
+              self.__CreateNewWarren()
+            self.__Landscape[x][y].Hole.AdvanceGeneration(self.__ShowDetail)
+            if self.__ShowDetail:
+              print("  Period End: ", end = "")
+              self.__Landscape[x][y].Hole.Inspect()
+              input()
+            if self.__Landscape[x][y].Hole.HoleHasDiedOut():
+              self.__Landscape[x][y].Hole = None
+              self.__WarrenCount -= 1
+    for x in range(self.__LandscapeSize):
+      for y in range(self.__LandscapeSize):
+        if self.__Landscape[x][y].Hole is not None:
+          if self.__Landscape[x][y].hole_type == HoleTypes.den:
+            if self.__ShowDetail:
+              print(f"Den at ({x},{y}):")
+              print("  Period Start: ", end="")
+              self.__Landscape[x][y].Hole.Inspect()
+            if self.__Landscape[x][y].Hole.needsToCreateFox():
+              self.__CreateNewFox()
+            if self.__ShowDetail:
+              print("  Period End: ", end="")
+              self.__Landscape[x][y].Hole.Inspect()
     for x in range (0, self.__LandscapeSize):
       for y in range (0, self.__LandscapeSize):
         if not self.__Landscape[x][y].Fox is None:
@@ -129,13 +145,15 @@ class Simulation:
       for y in range (0, self.__LandscapeSize):
         self.__Landscape[x][y] = Location()
     if FixedInitialLocations:
-      self.__Landscape[1][1].Warren = Warren(self.__Variability, 38)
-      self.__Landscape[2][8].Warren = Warren(self.__Variability, 80) 
-      self.__Landscape[9][7].Warren = Warren(self.__Variability, 20)
-      self.__Landscape[10][3].Warren = Warren(self.__Variability, 52)
-      self.__Landscape[13][4].Warren = Warren(self.__Variability, 67)
-      self.__Landscape[11][4].Warren = GiantWarren(self.__Variability, 115)
+      self.__Landscape[1][1].Hole = Warren(self.__Variability, 38)
+      self.__Landscape[2][8].Hole = Warren(self.__Variability, 80) 
+      self.__Landscape[9][7].Hole = Warren(self.__Variability, 20)
+      self.__Landscape[10][3].Hole = Warren(self.__Variability, 52)
+      self.__Landscape[13][4].Hole = Warren(self.__Variability, 67)
+      self.__Landscape[11][4].Hole = GiantWarren(self.__Variability, 115)
       self.__WarrenCount = 6
+      self.__Landscape[2][3].Hole = Den(self.__Variability)
+      self.__den_count = 1
       self.__Landscape[2][10].Fox = Fox(self.__Variability)
       self.__Landscape[6][1].Fox = Fox(self.__Variability)
       self.__Landscape[8][6].Fox = Fox(self.__Variability)
@@ -151,27 +169,36 @@ class Simulation:
   def __CreateNewWarren(self):
     x = random.randint(0, self.__LandscapeSize - 1)
     y = random.randint(0, self.__LandscapeSize - 1)
-    while not self.__Landscape[x][y].Warren is None:
+    while self.__Landscape[x][y].Hole is not None:
       x = random.randint(0, self.__LandscapeSize - 1)
       y = random.randint(0, self.__LandscapeSize - 1)
     if self.__ShowDetail:
       print("New Warren at (", x, ",", y, ")", sep = "")
-    self.__Landscape[x][y].Warren = Warren(self.__Variability)
+    self.__Landscape[x][y].Hole = Warren(self.__Variability)
+    self.__Landscape[x][y].hole_type = HoleTypes.warren
     self.__WarrenCount += 1
+  
+  def __createNewDen(self): # Unused, for now
+    x = random.randint(0, self.__LandscapeSize - 1)
+    y = random.randint(0, self.__LandscapeSize - 1)
+    while self.__Landscape[x][y].Hole is not None:
+      x = random.randint(0, self.__LandscapeSize - 1)
+      y = random.randint(0, self.__LandscapeSize - 1)
+    if self.__ShowDetail:
+      print(f"New Den at ({x},{y})")
+    self.__Landscape[x][y].Hole = Den(self.__Variability)
+    self.__Landscape[x][y].hole_type = HoleTypes.den
   
   def __CreateNewFox(self):
     x = random.randint(0, self.__LandscapeSize - 1)
     y = random.randint(0, self.__LandscapeSize - 1)
-    while not self.__Landscape[x][y].Fox is None:
-      x = random.randint(0, self.__LandscapeSize - 1)
-      y = random.randint(0, self.__LandscapeSize - 1)
     if self.__ShowDetail:
       print("  New Fox at (", x, ",", y, ")", sep = "")
     self.__Landscape[x][y].Fox = Fox(self.__Variability)
     self.__FoxCount += 1
 
   def __FoxesEatRabbitsInWarren(self, WarrenX, WarrenY):
-    RabbitCountAtStartOfPeriod  = self.__Landscape[WarrenX][WarrenY].Warren.GetRabbitCount()
+    RabbitCountAtStartOfPeriod  = self.__Landscape[WarrenX][WarrenY].Hole.GetRabbitCount()
     for FoxX in range(0, self.__LandscapeSize):
       for FoxY in range (0, self.__LandscapeSize):
         if not self.__Landscape[FoxX][FoxY].Fox is None:
@@ -183,7 +210,7 @@ class Simulation:
           else:
             PercentToEat = 0
           RabbitsToEat = int(round(float(PercentToEat * RabbitCountAtStartOfPeriod / 100)))
-          FoodConsumed = self.__Landscape[WarrenX][WarrenY].Warren.EatRabbits(RabbitsToEat)
+          FoodConsumed = self.__Landscape[WarrenX][WarrenY].Hole.EatRabbits(RabbitsToEat)
           self.__Landscape[FoxX][FoxY].Fox.GiveFood(FoodConsumed)
           if self.__ShowDetail:
             print("  ", FoodConsumed, " rabbits eaten by fox at (", FoxX, ",", FoxY, ").", sep = "")
@@ -210,12 +237,12 @@ class Simulation:
         print(" ", end = "")
       print("", y, "|", sep = "", end = "")
       for x in range (0, self.__LandscapeSize):
-        if not self.__Landscape[x][y].Warren is None:
-          if self.__Landscape[x][y].Warren.GetRabbitCount() < 10:
+        if not self.__Landscape[x][y].Hole is None:
+          if self.__Landscape[x][y].Hole.GetRabbitCount() < 10:
             print("  ", end = "")
-          elif self.__Landscape[x][y].Warren.GetRabbitCount() < 100:
+          elif self.__Landscape[x][y].Hole.GetRabbitCount() < 100:
             print(" ", end="")
-          print(self.__Landscape[x][y].Warren.GetRabbitCount(), end = "")
+          print(self.__Landscape[x][y].Hole.GetRabbitCount(), end = "")
         else:
           print("   ", end = "")
         if not self.__Landscape[x][y].Fox is None:
@@ -225,7 +252,17 @@ class Simulation:
         print("|", end = "")
       print()
 
-class Warren:
+class Hole:
+  def __init__(self, *useless_args):
+    return NotImplementedError("Abstract Class shouldn't be instantiated")
+  
+  def Inspect(self):
+    pass
+
+  def AdvanceGeneration(self):
+    pass
+
+class Warren(Hole):
   def __init__(self, Variability, RabbitCount = 0, maxRabbits = 99):
     self.__MAX_RABBITS_IN_WARREN = maxRabbits
     self.__RabbitCount = RabbitCount
@@ -356,8 +393,24 @@ class GiantWarren(Warren):
     self.__AlreadySpread = False
     return super().NeedToCreateNewWarren()
 
-class Den:
-  pass
+class Den(Hole):
+  def __init__(self, variability):
+    self.__periods_run = 0
+    self.__variability = variability
+    self.__time_till_next_fox = 3
+    self.__foxes_created = 0
+  
+  def AdvanceSimiulation(self, show_detail):
+    pass
+
+  def needsToCreateFox(self):
+    return self.__time_till_next_fox == 0
+  
+  def incrementFoxCounter(self):
+    self.__foxes_created += 1
+  
+  def Inspect(self):
+    print("Periods Run", self.__periods_run, "Foxes Created", self.__foxes_created, "Timer", self.__time_till_next_fox)
 
 class Animal:
   _ID = 1
@@ -483,6 +536,10 @@ class Rabbit(Animal):
     
   def GetReproductionRate(self): 
     return self.__ReproductionRate
+
+class HoleTypes(enum.Enum):
+  warren = 0
+  den = 1
 
 def Main():
   MenuOption = 0
