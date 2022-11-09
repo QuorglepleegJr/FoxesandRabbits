@@ -2,6 +2,8 @@
 #this code should be used in conjunction with the Preliminary Material
 #written by the AQA Programmer Team
 #developed in the Python 3.4.1 programming environment
+ 
+# TODO - FIX blank.WARRENT HAS DIED OUT
 
 import enum
 import random
@@ -151,8 +153,15 @@ class Simulation:
       self.__Landscape[10][3].Hole = Warren(self.__Variability, 52)
       self.__Landscape[13][4].Hole = Warren(self.__Variability, 67)
       self.__Landscape[11][4].Hole = GiantWarren(self.__Variability, 115)
+      self.__Landscape[1][1].hole_type = HoleTypes.warren
+      self.__Landscape[2][8].hole_type = HoleTypes.warren
+      self.__Landscape[9][7].hole_type = HoleTypes.warren
+      self.__Landscape[10][3].hole_type = HoleTypes.warren
+      self.__Landscape[13][4].hole_type = HoleTypes.warren
+      self.__Landscape[11][4].hole_type = HoleTypes.warren
       self.__WarrenCount = 6
       self.__Landscape[2][3].Hole = Den(self.__Variability)
+      self.__Landscape[2][3].hole_type = HoleTypes.den
       self.__den_count = 1
       self.__Landscape[2][10].Fox = Fox(self.__Variability)
       self.__Landscape[6][1].Fox = Fox(self.__Variability)
@@ -238,11 +247,16 @@ class Simulation:
       print("", y, "|", sep = "", end = "")
       for x in range (0, self.__LandscapeSize):
         if not self.__Landscape[x][y].Hole is None:
-          if self.__Landscape[x][y].Hole.GetRabbitCount() < 10:
-            print("  ", end = "")
-          elif self.__Landscape[x][y].Hole.GetRabbitCount() < 100:
-            print(" ", end="")
-          print(self.__Landscape[x][y].Hole.GetRabbitCount(), end = "")
+          if self.__Landscape[x][y].hole_type == HoleTypes.warren:
+            if self.__Landscape[x][y].Hole.GetRabbitCount() < 10:
+              print("  ", end = "")
+            elif self.__Landscape[x][y].Hole.GetRabbitCount() < 100:
+              print(" ", end="")
+            print(self.__Landscape[x][y].Hole.GetRabbitCount(), end = "")
+          else:
+            print(f"D{self.__Landscape[x][y].Hole.getFoxesCreated()}", end="")
+            if self.__Landscape[x][y].Hole.getFoxesCreated() < 10:
+              print(" ", end="")
         else:
           print("   ", end = "")
         if not self.__Landscape[x][y].Fox is None:
@@ -395,6 +409,7 @@ class GiantWarren(Warren):
 
 class Den(Hole):
   def __init__(self, variability):
+    self.__MAX_FOXES = 99
     self.__periods_run = 0
     self.__variability = variability
     self.__time_till_next_fox = 3
@@ -404,11 +419,14 @@ class Den(Hole):
     pass
 
   def needsToCreateFox(self):
-    return self.__time_till_next_fox == 0
+    return self.__time_till_next_fox == 0 and self.__foxes_created < self.__MAX_FOXES
   
   def incrementFoxCounter(self):
     self.__foxes_created += 1
   
+  def getFoxesCreated(self):
+    return self.__foxes_created
+
   def Inspect(self):
     print("Periods Run", self.__periods_run, "Foxes Created", self.__foxes_created, "Timer", self.__time_till_next_fox)
 
