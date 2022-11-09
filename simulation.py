@@ -195,15 +195,14 @@ class Simulation:
     print()
     print("TIME PERIOD:", self.__TimePeriod)
     print()
-    print("    ", end = "")
+    print("   ", end = "")
     for x in range (0, self.__LandscapeSize):
+      print(" ", end="")
       if x < 10:
-        print("  ", end = "")
-      elif x < 100:
-        print(" ", end="")
+        print(" ", end = "")
       print(x, "|", end = "")
     print()
-    for x in range (0, self.__LandscapeSize * 4 + 3):
+    for x in range (0, self.__LandscapeSize * 5 + 3):
       print("-", end = "")
     print()
     for y in range (0, self.__LandscapeSize):
@@ -213,10 +212,12 @@ class Simulation:
       for x in range (0, self.__LandscapeSize):
         if not self.__Landscape[x][y].Warren is None:
           if self.__Landscape[x][y].Warren.GetRabbitCount() < 10:
-            print(" ", end = "")
+            print("  ", end = "")
+          elif self.__Landscape[x][y].Warren.GetRabbitCount() < 100:
+            print(" ", end="")
           print(self.__Landscape[x][y].Warren.GetRabbitCount(), end = "")
         else:
-          print("  ", end = "")
+          print("   ", end = "")
         if not self.__Landscape[x][y].Fox is None:
           print("F", end = "")
         else:
@@ -354,6 +355,9 @@ class GiantWarren(Warren):
   def NeedToCreateNewWarren(self):
     self.__AlreadySpread = False
     return super().NeedToCreateNewWarren()
+
+class Den:
+  pass
 
 class Animal:
   _ID = 1
