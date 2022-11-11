@@ -2,8 +2,8 @@
 #this code should be used in conjunction with the Preliminary Material
 #written by the AQA Programmer Team
 #developed in the Python 3.4.1 programming environment
- 
-# TODO - FIX blank.WARRENT HAS DIED OUT
+
+#and edited by Benjamin
 
 import enum
 import random
@@ -98,8 +98,8 @@ class Simulation:
             if self.__ShowDetail:
               print("  Period End: ", end = "")
               self.__Landscape[x][y].Hole.Inspect()
-              input()
-            if self.__Landscape[x][y].Hole.HoleHasDiedOut():
+            #  input()
+            if self.__Landscape[x][y].Hole.WarrenHasDiedOut():
               self.__Landscape[x][y].Hole = None
               self.__WarrenCount -= 1
     for x in range(self.__LandscapeSize):
@@ -111,10 +111,18 @@ class Simulation:
               print("  Period Start: ", end="")
               self.__Landscape[x][y].Hole.Inspect()
             if self.__Landscape[x][y].Hole.needsToCreateFox():
-              self.__CreateNewFox()
+              NewFoxCount += 1
+              self.__Landscape[x][y].Hole.incrementFoxCounter()
+              self.__Landscape[x][y].Hole.resetTimer()
+              if self.__ShowDetail:
+                print("Created new fox")
+            if self.__Landscape[x][y].Hole.full():
+              self.__createNewDen()
+            self.__Landscape[x][y].Hole.advanceGeneration()
             if self.__ShowDetail:
               print("  Period End: ", end="")
               self.__Landscape[x][y].Hole.Inspect()
+              input()
     for x in range (0, self.__LandscapeSize):
       for y in range (0, self.__LandscapeSize):
         if not self.__Landscape[x][y].Fox is None:
@@ -138,7 +146,8 @@ class Simulation:
       for f in range (0, NewFoxCount):
         self.__CreateNewFox()
     if self.__ShowDetail:
-      input()
+      #input()
+      pass
     self.__DrawLandscape()
     print()
 
@@ -160,7 +169,7 @@ class Simulation:
       self.__Landscape[13][4].hole_type = HoleTypes.warren
       self.__Landscape[11][4].hole_type = HoleTypes.warren
       self.__WarrenCount = 6
-      self.__Landscape[2][3].Hole = Den(self.__Variability)
+      self.__Landscape[2][3].Hole = Den()
       self.__Landscape[2][3].hole_type = HoleTypes.den
       self.__den_count = 1
       self.__Landscape[2][10].Fox = Fox(self.__Variability)
@@ -187,7 +196,7 @@ class Simulation:
     self.__Landscape[x][y].hole_type = HoleTypes.warren
     self.__WarrenCount += 1
   
-  def __createNewDen(self): # Unused, for now
+  def __createNewDen(self):
     x = random.randint(0, self.__LandscapeSize - 1)
     y = random.randint(0, self.__LandscapeSize - 1)
     while self.__Landscape[x][y].Hole is not None:
@@ -195,7 +204,7 @@ class Simulation:
       y = random.randint(0, self.__LandscapeSize - 1)
     if self.__ShowDetail:
       print(f"New Den at ({x},{y})")
-    self.__Landscape[x][y].Hole = Den(self.__Variability)
+    self.__Landscape[x][y].Hole = Den()
     self.__Landscape[x][y].hole_type = HoleTypes.den
   
   def __CreateNewFox(self):
@@ -270,11 +279,11 @@ class Hole:
   def __init__(self, *useless_args):
     return NotImplementedError("Abstract Class shouldn't be instantiated")
   
-  def Inspect(self):
-    pass
+  def Inspect(self, *useless_args):
+    return NotImplementedError("Abstract Class shouldn't be instantiated")
 
-  def AdvanceGeneration(self):
-    pass
+  def AdvanceGeneration(self, *useless_args):
+    return NotImplementedError("Abstract Class shouldn't be instantiated")
 
 class Warren(Hole):
   def __init__(self, Variability, RabbitCount = 0, maxRabbits = 99):
@@ -408,18 +417,29 @@ class GiantWarren(Warren):
     return super().NeedToCreateNewWarren()
 
 class Den(Hole):
-  def __init__(self, variability):
+  def __init__(self):
     self.__MAX_FOXES = 99
+    self.__TIME_BETWEEN_FOXES = 3
     self.__periods_run = 0
-    self.__variability = variability
+    self.__alreadySpread = False
     self.__time_till_next_fox = 3
     self.__foxes_created = 0
   
-  def AdvanceSimiulation(self, show_detail):
-    pass
+  def advanceGeneration(self):
+    self.__time_till_next_fox -= 1
+    self.__periods_run += 1
+    
+  def resetTimer(self):
+    self.__time_till_next_fox = self.__TIME_BETWEEN_FOXES
 
   def needsToCreateFox(self):
     return self.__time_till_next_fox == 0 and self.__foxes_created < self.__MAX_FOXES
+
+  def full(self):
+    if self.__foxes_created >= self.__MAX_FOXES and not self.__alreadySpread:
+      self.__alreadySpread = True
+      return True
+    return False
   
   def incrementFoxCounter(self):
     self.__foxes_created += 1
@@ -518,9 +538,9 @@ class Fox(Animal):
     print("    Food needed:         ", self.__FoodUnitsNeeded)
     print("    Food eaten:          ", self.__FoodUnitsConsumedThisPeriod)
     if self.__gender == Genders.Female:
-      print("    Gender:              Female")
+      print("    Gender:               Female")
     else:
-      print("    Gender:              Male")
+      print("    Gender:               Male")
     print()
 
 class Genders(enum.Enum):
@@ -542,9 +562,9 @@ class Rabbit(Animal):
     super(Rabbit, self).Inspect()
     print("    Rep rate:            ", round(self.__ReproductionRate, 1))
     if self.__Gender == Genders.Female:
-      print("    Gender:              Female")
+      print("    Gender:               Female")
     else:
-      print("    Gender:              Male")
+      print("    Gender:               Male")
     
   def IsFemale(self):
     if self.__Gender == Genders.Female:
