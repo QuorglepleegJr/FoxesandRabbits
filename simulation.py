@@ -605,7 +605,11 @@ class Rabbit(Animal):
       return True
     else:
       return False
-    
+  
+  def CalculateNewAge(self):
+    super(Rabbit, self).CalculateNewAge()
+    self._ProbabilityOfDeathOtherCauses += 0.1
+
   def GetReproductionRate(self): 
     return self.__ReproductionRate
 
