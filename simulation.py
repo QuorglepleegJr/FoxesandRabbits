@@ -36,21 +36,17 @@ class Simulation:
     self.__CreateLandscapeAndAnimals(InitialWarrenCount, InitialFoxCount, self.__FixedInitialLocations)
     self.__DrawLandscape()
     MenuOption = 0
-    while (self.__WarrenCount > 0 or self.__FoxCount > 0) and MenuOption != 5:
+    while (self.__WarrenCount > 0 or self.__FoxCount > 0) and MenuOption != 7:
       print()
-      print("0. Advance ten time periods hiding detail")
       print("1. Advance to next time period showing detail")
       print("2. Advance to next time period hiding detail")
-      print("3. Inspect fox")
-      print("4. Inspect warren")
-      print("5. Exit")
+      print("3. Advance ten time periods hiding detail")
+      print("4. Inspect fox")
+      print("5. Inspect warren")
+      print("6. Find biggest warren")
+      print("7. Exit")
       print()
       MenuOption = int(input("Select option: "))
-      if MenuOption == 0:
-        self.__TimePeriod += 10
-        self.__ShowDetail = False
-        for x in range(10):
-          self.__AdvanceTimePeriod()
       if MenuOption == 1:
         self.__TimePeriod += 1
         self.__ShowDetail = True
@@ -60,11 +56,16 @@ class Simulation:
         self.__ShowDetail = False
         self.__AdvanceTimePeriod()
       if MenuOption == 3:
+        self.__TimePeriod += 10
+        self.__ShowDetail = False
+        for x in range(10):
+          self.__AdvanceTimePeriod()
+      if MenuOption == 4:
         x = self.__InputCoordinate("x")
         y = self.__InputCoordinate("y")
         if not self.__Landscape[x][y].Fox is None:
           self.__Landscape[x][y].Fox.Inspect()
-      if MenuOption == 4:
+      if MenuOption == 5:
         x = self.__InputCoordinate("x")
         y = self.__InputCoordinate("y")
         if not self.__Landscape[x][y].Hole is None:
@@ -72,8 +73,22 @@ class Simulation:
           self.__ViewRabbits = input("View individual rabbits (y/n)? ")
           if self.__ViewRabbits == "y":
             self.__Landscape[x][y].Hole.ListRabbits()
+      if MenuOption == 6:
+        print(f"Biggest warren at {self.__findBiggestWarren()}")
     input()
-    
+  
+  def __findBiggestWarren(self):
+    biggest = 0
+    biggest_coords = (0,0)
+    for x in range(self.__LandscapeSize):
+      for y in range(self.__LandscapeSize):
+        if self.__Landscape[x][y].hole_type == HoleTypes.warren:
+          size = self.__Landscape[x][y].Hole.GetRabbitCount()
+          if size > biggest:
+            biggest = size
+            biggest_coords = (x,y)
+    return biggest_coords
+
   def __InputCoordinate(self, CoordinateName):
     Coordinate = int(input("  Input " + CoordinateName + " coordinate:"))
     return Coordinate
