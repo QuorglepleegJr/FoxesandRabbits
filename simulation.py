@@ -98,7 +98,7 @@ class Simulation:
             if self.__ShowDetail:
               print("  Period End: ", end = "")
               self.__Landscape[x][y].Hole.Inspect()
-            #  input()
+              input()
             if self.__Landscape[x][y].Hole.WarrenHasDiedOut():
               self.__Landscape[x][y].Hole = None
               self.__WarrenCount -= 1
@@ -146,9 +146,10 @@ class Simulation:
       for f in range (0, NewFoxCount):
         self.__CreateNewFox()
     if self.__ShowDetail:
-      #input()
+      input()
       pass
     self.__DrawLandscape()
+    print(f"The average life expectancy of a fox stands at {Fox.getLifeExpectancy()}")
     print()
 
   def __CreateLandscapeAndAnimals(self, InitialWarrenCount, InitialFoxCount, FixedInitialLocations):
@@ -410,7 +411,7 @@ class Warren(Hole):
   
 class GiantWarren(Warren):
   def __init__(self, variability, rabbit_count = 1):
-    super().__init__(variability, rabbit_count, 200)
+    super(GiantWarren, self).__init__(variability, rabbit_count, 200)
   
   def NeedToCreateNewWarren(self):
     self.__AlreadySpread = False
@@ -490,17 +491,29 @@ class Fox(Animal):
 
   __total_dead_foxes = 0
   __total_dead_fox_age = 0
+  __DEFAULT_LIFE_SPAN = 7
+  __DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES = 0.1
+
+  def getLifeExpectancy():
+    if Fox.__total_dead_foxes == 0:
+      return Fox.__DEFAULT_LIFE_SPAN
+    return round(Fox.__total_dead_fox_age/Fox.__total_dead_foxes, 2)
 
   def __init__(self, Variability):
-    self.__DEFAULT_LIFE_SPAN = 7
-    self.__DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES = 0.1
-    super(Fox, self).__init__(self.__DEFAULT_LIFE_SPAN, self.__DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES, Variability)
+    super(Fox, self).__init__(Fox.__DEFAULT_LIFE_SPAN, Fox.__DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES, Variability)
     self.__FoodUnitsNeeded = int(10 * self._CalculateRandomValue(100, Variability) / 100)
     self.__FoodUnitsConsumedThisPeriod  = 0
     if random.randint(0, 99) < 33:
       self.__gender = Genders.Male
     else:
       self.__gender = Genders.Female
+  
+  def CheckIfDead(self):
+    dead = not self._IsAlive
+    if dead:
+      Fox.__total_dead_fox_age += self._Age
+      Fox.__total_dead_foxes += 1
+    return dead
 
   def AdvanceGeneration(self, ShowDetail):
     if self.__FoodUnitsConsumedThisPeriod == 0:
@@ -552,10 +565,12 @@ class Genders(enum.Enum):
   Female = 2
     
 class Rabbit(Animal):
+
+  __DEFAULT_LIFE_SPAN = 4
+  __DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES  = 0.05
+  
   def __init__(self, Variability, ParentsReproductionRate = 1.2, genderRatio = 50):
-    self.__DEFAULT_LIFE_SPAN = 4
-    self.__DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES  = 0.05
-    super(Rabbit, self).__init__(self.__DEFAULT_LIFE_SPAN, self.__DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES, Variability)
+    super(Rabbit, self).__init__(Rabbit.__DEFAULT_LIFE_SPAN, Rabbit.__DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES, Variability)
     self.__ReproductionRate = ParentsReproductionRate * self._CalculateRandomValue(100, Variability) / 100
     if random.randint(0, 100) < genderRatio:
       self.__Gender = Genders.Male
