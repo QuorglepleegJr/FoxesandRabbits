@@ -1,28 +1,4 @@
-Extras on top of questions:
+Ideas for what to do:
 
-GENERAL TIDY UP OF CODE TO PYTHON STYLE GUIDE
-
-General:
-
-Add ability to specify positions for custom
-Add ability to store and load custom config files
-+ Create default config file
-Add ability to specify lifespans and other base settings
-/ for rabbits and foxes
-
-From Q4:
-
-Add setting in custom to edit genderRatio
-
-From Q5:
-
-Add ability to edit gender ratio of foxes
-Add setting for said ability
-
-From Q6:
-
-Add setting in custom to create GiantWarrens
-
-From Q7:
-
-Add setting in custom to create Dens
+Make foxes mating gender based
+Add Rabbit baby litters (1,12, most commonly 5)
