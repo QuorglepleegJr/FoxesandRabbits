@@ -487,6 +487,10 @@ class Animal:
     return BaseValue - (BaseValue * Variability / 100) + (BaseValue * random.randint(0, Variability * 2) / 100)
 
 class Fox(Animal):
+
+  __total_dead_foxes = 0
+  __total_dead_fox_age = 0
+
   def __init__(self, Variability):
     self.__DEFAULT_LIFE_SPAN = 7
     self.__DEFAULT_PROBABILITY_DEATH_OTHER_CAUSES = 0.1
