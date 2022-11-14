@@ -8,6 +8,7 @@
 import enum
 import random
 import math
+from sorting import BubbleSort
 
 class Location:
   def __init__(self):
@@ -17,6 +18,24 @@ class Location:
 
 class Simulation:
   def __init__(self, LandscapeSize, InitialWarrenCount, InitialFoxCount, Variability, FixedInitialLocations):
+    
+    self.__menuMethods = [self.__timePeriodShowingDetails,
+                          self.__timePeriodHidingDetails,
+                          self.__tenTimePeriods,
+                          self.__inspectFox,
+                          self.__inspectWarren,
+                          self.__findBiggestWarren,
+                          self.__inspectAllRabbits,
+                          ]
+    self.__menuOptions = ["Advance to next time period showing detail",
+                          "Advance to next time period hiding detail",
+                          "Advance 10 time periods hiding detail",
+                          "Inspect fox",
+                          "Inspect warren",
+                          "Find biggest warren",
+                          "Inspect all rabbits"
+                          ]
+    
     self.__ViewRabbits = ""
     self.__TimePeriod = 0
     self.__WarrenCount = 0
@@ -36,47 +55,51 @@ class Simulation:
     self.__CreateLandscapeAndAnimals(InitialWarrenCount, InitialFoxCount, self.__FixedInitialLocations)
     self.__DrawLandscape()
     MenuOption = 0
-    while (self.__WarrenCount > 0 or self.__FoxCount > 0) and MenuOption != 7:
-      print()
-      print("1. Advance to next time period showing detail")
-      print("2. Advance to next time period hiding detail")
-      print("3. Advance ten time periods hiding detail")
-      print("4. Inspect fox")
-      print("5. Inspect warren")
-      print("6. Find biggest warren")
-      print("7. Exit")
-      print()
-      MenuOption = int(input("Select option: "))
-      if MenuOption == 1:
-        self.__TimePeriod += 1
-        self.__ShowDetail = True
-        self.__AdvanceTimePeriod()
-      if MenuOption == 2:
-        self.__TimePeriod += 1
-        self.__ShowDetail = False
-        self.__AdvanceTimePeriod()
-      if MenuOption == 3:
-        self.__TimePeriod += 10
-        self.__ShowDetail = False
-        for x in range(10):
-          self.__AdvanceTimePeriod()
-      if MenuOption == 4:
-        x = self.__InputCoordinate("x")
-        y = self.__InputCoordinate("y")
-        if not self.__Landscape[x][y].Fox is None:
-          self.__Landscape[x][y].Fox.Inspect()
-      if MenuOption == 5:
-        x = self.__InputCoordinate("x")
-        y = self.__InputCoordinate("y")
-        if not self.__Landscape[x][y].Hole is None:
-          self.__Landscape[x][y].Hole.Inspect()
-          self.__ViewRabbits = input("View individual rabbits (y/n)? ")
-          if self.__ViewRabbits == "y":
-            self.__Landscape[x][y].Hole.ListRabbits()
-      if MenuOption == 6:
-        print(f"Biggest warren at {self.__findBiggestWarren()}")
+    while (self.__WarrenCount > 0 or self.__FoxCount > 0) and MenuOption != len(self.__menuMethods):
+      self.__showMenuOptions()
+      MenuOption = int(input("Select option: "))-1
+      if MenuOption != len(self.__menuMethods):
+        self.__menuMethods[MenuOption]()
+    print("/nPress Enter to continue:")
     input()
   
+  def __showMenuOptions(self):
+    print()
+    for index, option in enumerate(self.__menuOptions, 1):
+      print(f"{index}.{' '*(3-len(str(index)))}{option}")
+    print()
+  
+  def __timePeriodShowingDetails(self):
+    self.__TimePeriod += 1
+    self.__ShowDetail = True
+    self.__AdvanceTimePeriod()
+  
+  def __timePeriodHidingDetails(self):
+    self.__TimePeriod += 1
+    self.__ShowDetail = False
+    self.__AdvanceTimePeriod()
+  
+  def __tenTimePeriods(self):
+    self.__TimePeriod += 10
+    self.__ShowDetail = False
+    for x in range(10):
+      self.__AdvanceTimePeriod()
+    
+  def __inspectFox(self):
+    x = self.__InputCoordinate("x")
+    y = self.__InputCoordinate("y")
+    if not self.__Landscape[x][y].Fox is None:
+      self.__Landscape[x][y].Fox.Inspect()
+    
+  def __inspectWarren(self):
+    x = self.__InputCoordinate("x")
+    y = self.__InputCoordinate("y")
+    if not self.__Landscape[x][y].Hole is None:
+      self.__Landscape[x][y].Hole.Inspect()
+      self.__ViewRabbits = input("View individual rabbits (y/n)? ")
+      if self.__ViewRabbits == "y":
+        self.__Landscape[x][y].Hole.ListRabbits()
+
   def __findBiggestWarren(self):
     biggest = 0
     biggest_coords = (0,0)
@@ -87,7 +110,16 @@ class Simulation:
           if size > biggest:
             biggest = size
             biggest_coords = (x,y)
-    return biggest_coords
+    print(f"Biggest warren at {biggest_coords}")
+
+  def __inspectAllRabbits(self):
+    rabbit_list = []
+    for x in range(self.__LandscapeSize):
+      for y in range(self.__LandscapeSize):
+        if self.__Landscape[x][y].hole_type == HoleTypes.warren:
+          rabbit_list += self.__Landscape[x][y].Hole.getRabbitList()
+    sorted_rabbit_list = BubbleSort.sort(rabbit_list)
+
 
   def __InputCoordinate(self, CoordinateName):
     Coordinate = int(input("  Input " + CoordinateName + " coordinate:"))
@@ -116,6 +148,7 @@ class Simulation:
               input()
             if self.__Landscape[x][y].Hole.WarrenHasDiedOut():
               self.__Landscape[x][y].Hole = None
+              self.__Landscape[x][y].hole_type = None
               self.__WarrenCount -= 1
     for x in range(self.__LandscapeSize):
       for y in range(self.__LandscapeSize):
@@ -222,6 +255,7 @@ class Simulation:
       print(f"New Den at ({x},{y})")
     self.__Landscape[x][y].Hole = Den()
     self.__Landscape[x][y].hole_type = HoleTypes.den
+    self.__den_count += 1
   
   def __CreateNewFox(self):
     x = random.randint(0, self.__LandscapeSize - 1)
@@ -321,6 +355,13 @@ class Warren(Hole):
 
   def GetRabbitCount(self): 
     return self.__RabbitCount
+  
+  def getRabbitList(self):
+    all_rabbits = []
+    for potential_rabbit in self.__Rabbits:
+      if potential_rabbit is not None:
+        all_rabbits.append(potential_rabbit)
+    return all_rabbits
   
   def NeedToCreateNewWarren(self): 
     if self.__RabbitCount == self.__MAX_RABBITS_IN_WARREN and not self.__AlreadySpread:
