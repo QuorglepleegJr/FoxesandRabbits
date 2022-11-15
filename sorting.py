@@ -48,13 +48,13 @@ class BubbleSort:
       output_list.append(item_pair[0])
     return output_list
   
-  def __sortSet(input_set):
+  def __sortSet(input_set): # No longer used by simulation.py, but left in case needed later
     arbitrary_item = next(iter(input_set))
     if isinstance(arbitrary_item, tuple) and len(arbitrary_item) == 2:
       return BubbleSort.__sortPairsSet(input_set)
     raise NotImplementedError("Unsupported set format for BubbleSort")
 
-  def __sortPairsSet(input_set):
+  def __sortPairsSet(input_set): # See note on __sortSet
     output_pairs = list(input_set)
     finished = False
     while not finished:

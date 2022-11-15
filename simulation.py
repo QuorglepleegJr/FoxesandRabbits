@@ -17,13 +17,12 @@ class NodeSides(enum.Enum):
 
 class WarrenGraph:
   def __init__(self, *nodes):
-    self.__nodes = set()
+    self.__nodes = []
     for node in nodes:
       self.addNode(node)
-    self.__adjacency_matrix = self.__calculateMatrix
 
   def addNode(self, node):
-    self.__nodes.add(node)
+    self.__nodes.append(node)
   
   def displayAdjacencyList(self):
     print()
@@ -40,31 +39,34 @@ class WarrenGraph:
     print("Adjacency matrix:")
     print()
 
-    node_coords = set()
+    node_coords = []
     for node in self.__nodes:
-      node_coords.add(node.getCoord(NodeSides.self))
-    ordered_node_coords = BubbleSort.sort(node_coords)
+      node_coords.append(node.getCoord(NodeSides.self))
+    node_matched_coord_dict = {}
+    for index in range(len(self.__nodes)):
+      node_matched_coord_dict[self.__nodes[index]] = node_coords[index]
+    self.__nodes = BubbleSort.sort(node_matched_coord_dict)
     
     size = len(self.__nodes)
     mat = [[0]*size]*size
-    for i in range(len(ordered_node_coords)):
-      for j in range(len(ordered_node_coords)):
-        if i:
-          pass
-        # CONTINUE HERE CREATING THE MATRIX
+    for i in range(size):
+      for j in range(size):
+        if self.__nodes[i].checkForConnection(self.__nodes[j].getCoord(NodeSides.self)):
+          mat[i][j] = 1
     
     max_length = 0
-    for pos in ordered_node_coords:
+    for pos in self.__nodes:
       if len(str(pos)) > max_length:
          max_length = len(str(pos))
     print(max_length)
     print(' '*max_length + '|', end="")
-    for pos in ordered_node_coords:
+    for pos in self.__nodes:
       text = str(pos)
       print(' '*math.ceil((max_length-len(text))/2)+text+' '*math.floor((max_length-len(text))/2), end="|")
     print()
-    print('-'*((len(ordered_node_coords)+1)*(max_length+1)))
-    # Print matrix body
+    print('-'*((len(self.__nodes)+1)*(max_length+1)))
+    for row in mat:
+      print() # CONTINUE HERE
 
 
 class Node:
@@ -77,14 +79,21 @@ class Node:
     self.__right_branch_y = r_y
   
   def getCoord(self, type):
-    if type == NodeSides.self:
-      return self.__getSelfCoord()
     if type == NodeSides.left:
       return self.__getLeftCoord()
+    if type == NodeSides.self:
+      return self.__getSelfCoord()
     if type == NodeSides.right:
       return self.__getRightCoord()
     return "None"
-
+    
+  def checkForConnection(self, coords):
+    if coords == self.__getLeftCoord:
+      return True
+    if coords == self.__getRightCoord:
+      return True
+    return False
+  
   def __getSelfCoord(self):
     return (self.__self_x ,self.__self_y)
   
@@ -93,6 +102,9 @@ class Node:
   
   def __getRightCoord(self):
     return (self.__right_branch_x, self.__right_branch_y)
+  
+  def __str__(self):
+    return str(self.getCoord(NodeSides.self))
 
 class Location:
   def __init__(self):
@@ -829,3 +841,5 @@ def Main():
 
 if __name__ == "__main__":
   Main()
+
+Main()
