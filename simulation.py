@@ -10,6 +10,58 @@ import random
 import math
 from sorting import BubbleSort
 
+class NodeSides(enum.Enum):
+  left = 0
+  self = 1
+  right = 2
+
+class WarrenGraph:
+  def __init__(self, *nodes):
+    self.__nodes = set()
+    for node in nodes:
+      self.addNode(node)
+  
+  def addNode(self, node):
+    self.__nodes.add(node)
+  
+  def displayAdjacencyList(self):
+    print()
+    print("Adjacency list:")
+    print()
+    for node in self.__nodes:
+      print(f"  Node at {node.getCoord(NodeSides.self)}:")
+      print(f"    Left branch at {node.getCoord(NodeSides.left)}")
+      print(f"    Right branch at {node.getCoord(NodeSides.right)}")
+      print()
+    
+
+class Node:
+  def __init__(self, x, y, l_x, l_y, r_x, r_y):
+    self.__self_x = x
+    self.__self_y = y
+    self.__left_branch_x = l_x
+    self.__left_branch_y = l_y
+    self.__right_branch_x = r_x
+    self.__right_branch_y = r_y
+  
+  def getCoord(self, type):
+    if type == NodeSides.self:
+      return self.__getSelfCoord()
+    if type == NodeSides.left:
+      return self.__getLeftCoord()
+    if type == NodeSides.right:
+      return self.__getRightCoord()
+    return "None"
+
+  def __getSelfCoord(self):
+    return f"({self.__self_x}, {self.__self_y})"
+  
+  def __getLeftCoord(self):
+    return f"({self.__left_branch_x}, {self.__left_branch_y})"
+  
+  def __getRightCoord(self):
+    return f"({self.__right_branch_x}, {self.__right_branch_y})"
+
 class Location:
   def __init__(self):
     self.Fox = None
@@ -26,6 +78,7 @@ class Simulation:
                           self.__inspectWarren,
                           self.__findBiggestWarren,
                           self.__inspectAllRabbits,
+                          self.__showAdjList,
                           ]
     self.__menuOptions = ["Advance to next time period showing detail",
                           "Advance to next time period hiding detail",
@@ -33,7 +86,8 @@ class Simulation:
                           "Inspect fox",
                           "Inspect warren",
                           "Find biggest warren",
-                          "Inspect all rabbits"
+                          "Inspect all rabbits",
+                          "Show adjancency list",
                           ]
     
     self.__ViewRabbits = ""
@@ -55,6 +109,13 @@ class Simulation:
     self.__CreateLandscapeAndAnimals(InitialWarrenCount, InitialFoxCount, self.__FixedInitialLocations)
     self.__DrawLandscape()
     MenuOption = 0
+
+    node1 = Node(1,1,2,8,9,7)
+    node2 = Node(2,8,13,4,1,1)
+    node3 = Node(9,7,1,1,13,4)
+    node4 = Node(13,4,9,7,3,8)
+    self.__warrenGraph = WarrenGraph(node1,node2,node3,node4)
+
     while (self.__WarrenCount > 0 or self.__FoxCount > 0) and MenuOption != len(self.__menuMethods):
       self.__showMenuOptions()
       MenuOption = int(input("Select option: "))-1
@@ -128,6 +189,9 @@ class Simulation:
       else:
         print()
   
+  def __showAdjList(self):
+    self.__warrenGraph.displayAdjacencyList()
+  
   def __getAllRabbitsAgeOrder(self):
     rabbit_list = []
     for x in range(self.__LandscapeSize):
@@ -139,6 +203,18 @@ class Simulation:
       rabbit_age_pairs[rabbit] = rabbit.getAge()
     sorted_rabbit_list = BubbleSort.sort(rabbit_age_pairs)
     return sorted_rabbit_list
+  
+  def __getRandomWarren(self, *none_equals): # Unused as of yet
+    valid_warren_found = False
+    warren = None
+    while not valid_warren_found:
+      x = random.randint(0, self.__LandscapeSize - 1)
+      y = random.randint(0, self.__LandscapeSize - 1)
+      warren1 = self.__Landscape[x][y].Hole
+      if self.__Landscape[x][y].hole_type == HoleTypes.warren and warren not in none_equals:
+        valid_warren_found = True
+    return warren
+      
 
   def __InputCoordinate(self, CoordinateName):
     Coordinate = int(input("  Input " + CoordinateName + " coordinate:"))
