@@ -3,8 +3,6 @@
 #written by the AQA Programmer Team
 #developed in the Python 3.4.1 programming environment
 
-# TODO: Edit when warrens are created add them as nodes to warrengraph
-
 #and edited by Benjamin
 
 import enum
@@ -89,7 +87,7 @@ class Simulation:
                           "Inspect warren",
                           "Find biggest warren",
                           "Inspect all rabbits",
-                          "Show adjancency graph",
+                          "Show adjancency list",
                           ]
     
     self.__ViewRabbits = ""
@@ -206,24 +204,17 @@ class Simulation:
     sorted_rabbit_list = BubbleSort.sort(rabbit_age_pairs)
     return sorted_rabbit_list
   
-  def __getTwoRandomWarrens(self, initial = None):
+  def __getRandomWarren(self, *none_equals): # Unused as of yet
     valid_warren_found = False
-    warren1 = None
-    warren2 = None
+    warren = None
     while not valid_warren_found:
       x = random.randint(0, self.__LandscapeSize - 1)
       y = random.randint(0, self.__LandscapeSize - 1)
       warren1 = self.__Landscape[x][y].Hole
-      if self.__Landscape[x][y].hole_type == HoleTypes.warren and warren1 != initial:
+      if self.__Landscape[x][y].hole_type == HoleTypes.warren and warren not in none_equals:
         valid_warren_found = True
-    valid_warren_found = False
-    while not valid_warren_found:
-      x = random.randint(0, self.__LandscapeSize - 1)
-      y = random.randint(0, self.__LandscapeSize - 1)
-      warren2 = self.__Landscape[x][y].Hole
-      if self.__Landscape[x][y].hole_type == HoleTypes.warren and warren2 != warren1 and warren2 != initial:
-        valid_warren_found = True
-    return (warren1, warren2)
+    return warren
+      
 
   def __InputCoordinate(self, CoordinateName):
     Coordinate = int(input("  Input " + CoordinateName + " coordinate:"))
