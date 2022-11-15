@@ -20,7 +20,8 @@ class WarrenGraph:
     self.__nodes = set()
     for node in nodes:
       self.addNode(node)
-  
+    self.__adjacency_matrix = self.__calculateMatrix
+
   def addNode(self, node):
     self.__nodes.add(node)
   
@@ -34,6 +35,37 @@ class WarrenGraph:
       print(f"    Right branch at {node.getCoord(NodeSides.right)}")
       print()
     
+  def displayAdjacencyMatrix(self):
+    print()
+    print("Adjacency matrix:")
+    print()
+
+    node_coords = set()
+    for node in self.__nodes:
+      node_coords.add(node.getCoord(NodeSides.self))
+    ordered_node_coords = BubbleSort.sort(node_coords)
+    
+    size = len(self.__nodes)
+    mat = [[0]*size]*size
+    for i in range(len(ordered_node_coords)):
+      for j in range(len(ordered_node_coords)):
+        if i:
+          pass
+        # CONTINUE HERE CREATING THE MATRIX
+    
+    max_length = 0
+    for pos in ordered_node_coords:
+      if len(str(pos)) > max_length:
+         max_length = len(str(pos))
+    print(max_length)
+    print(' '*max_length + '|', end="")
+    for pos in ordered_node_coords:
+      text = str(pos)
+      print(' '*math.ceil((max_length-len(text))/2)+text+' '*math.floor((max_length-len(text))/2), end="|")
+    print()
+    print('-'*((len(ordered_node_coords)+1)*(max_length+1)))
+    # Print matrix body
+
 
 class Node:
   def __init__(self, x, y, l_x, l_y, r_x, r_y):
@@ -54,13 +86,13 @@ class Node:
     return "None"
 
   def __getSelfCoord(self):
-    return f"({self.__self_x}, {self.__self_y})"
+    return (self.__self_x ,self.__self_y)
   
   def __getLeftCoord(self):
-    return f"({self.__left_branch_x}, {self.__left_branch_y})"
+    return (self.__left_branch_x, self.__left_branch_y)
   
   def __getRightCoord(self):
-    return f"({self.__right_branch_x}, {self.__right_branch_y})"
+    return (self.__right_branch_x, self.__right_branch_y)
 
 class Location:
   def __init__(self):
@@ -79,6 +111,7 @@ class Simulation:
                           self.__findBiggestWarren,
                           self.__inspectAllRabbits,
                           self.__showAdjList,
+                          self.__showAdjMatrix,
                           ]
     self.__menuOptions = ["Advance to next time period showing detail",
                           "Advance to next time period hiding detail",
@@ -87,7 +120,8 @@ class Simulation:
                           "Inspect warren",
                           "Find biggest warren",
                           "Inspect all rabbits",
-                          "Show adjancency list",
+                          "Show adjacency list",
+                          "Show adjacency matrix",
                           ]
     
     self.__ViewRabbits = ""
@@ -191,6 +225,9 @@ class Simulation:
   
   def __showAdjList(self):
     self.__warrenGraph.displayAdjacencyList()
+  
+  def __showAdjMatrix(self):
+    self.__warrenGraph.displayAdjacencyMatrix()
   
   def __getAllRabbitsAgeOrder(self):
     rabbit_list = []
