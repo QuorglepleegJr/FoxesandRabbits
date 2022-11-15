@@ -60,13 +60,14 @@ class Simulation:
       MenuOption = int(input("Select option: "))-1
       if MenuOption != len(self.__menuMethods):
         self.__menuMethods[MenuOption]()
-    print("/nPress Enter to continue:")
+    print("\nPress Enter to continue:")
     input()
   
   def __showMenuOptions(self):
     print()
     for index, option in enumerate(self.__menuOptions, 1):
       print(f"{index}.{' '*(3-len(str(index)))}{option}")
+    print(f"{len(self.__menuOptions)+1}.  Exit")
     print()
   
   def __timePeriodShowingDetails(self):
@@ -113,13 +114,31 @@ class Simulation:
     print(f"Biggest warren at {biggest_coords}")
 
   def __inspectAllRabbits(self):
+    rabbit_list = self.__getAllRabbitsAgeOrder()
+    rabbit_list.reverse()
+    print("Beginning rabbit display:")
+    print("  Press Enter to show next rabbit")
+    print("  Enter any input to show all remaining rabbits")
+    fast_forward = len(input()) > 0
+    for index in range(len(rabbit_list)):
+      print(f"Rabbits remaining: {len(rabbit_list)-index}\n")
+      rabbit_list[index].Inspect()
+      if not fast_forward:
+        fast_forward = len(input()) > 0
+      else:
+        print()
+  
+  def __getAllRabbitsAgeOrder(self):
     rabbit_list = []
     for x in range(self.__LandscapeSize):
       for y in range(self.__LandscapeSize):
         if self.__Landscape[x][y].hole_type == HoleTypes.warren:
           rabbit_list += self.__Landscape[x][y].Hole.getRabbitList()
-    sorted_rabbit_list = BubbleSort.sort(rabbit_list)
-
+    rabbit_age_pairs = {}
+    for rabbit in rabbit_list:
+      rabbit_age_pairs[rabbit] = rabbit.getAge()
+    sorted_rabbit_list = BubbleSort.sort(rabbit_age_pairs)
+    return sorted_rabbit_list
 
   def __InputCoordinate(self, CoordinateName):
     Coordinate = int(input("  Input " + CoordinateName + " coordinate:"))
@@ -653,6 +672,9 @@ class Rabbit(Animal):
 
   def GetReproductionRate(self): 
     return self.__ReproductionRate
+  
+  def getAge(self):
+    return self._Age
 
 class HoleTypes(enum.Enum):
   warren = 0
@@ -663,10 +685,10 @@ def Main():
   while MenuOption != 4:
     print("Predator Prey Simulation Main Menu")
     print()
-    print("1. Run simulation with default settings")
-    print("2. Run simulation with custom settings")
-    print("3. Run simulation of Rabbit Paradise")
-    print("4. Exit")
+    print("1.  Run simulation with default settings")
+    print("2.  Run simulation with custom settings")
+    print("3.  Run simulation of Rabbit Paradise")
+    print("4.  Exit")
     print()
     MenuOption = int(input("Select option: "))
     if MenuOption != 4:

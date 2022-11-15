@@ -26,13 +26,22 @@ class BubbleSort:
     return output_list
   
   def __sortDict(input_dict):
-    output_list = []
+    output_pairs = []
     for element in input_dict:
-        output_list.append((element, input_dict[element]))
-    # CONTINUE HERE
-
-
-x = [1,5,2,6,7,3,1,3]
-y = BubbleSort.sort(x)
-print(x)
-print(y)
+      output_pairs.append((element, input_dict[element]))
+    finished = False
+    while not finished:
+      swap_made = False
+      for index in range(len(input_dict)-1):
+        item1 = output_pairs[index]
+        item2 = output_pairs[index+1]
+        if item2[1] < item1[1]:
+          swap_made = True
+          output_pairs[index] = item2
+          output_pairs[index+1] = item1
+      if not swap_made:
+        finished = True
+    output_list = []
+    for item_pair in output_pairs:
+      output_list.append(item_pair[0])
+    return output_list
